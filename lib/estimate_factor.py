@@ -42,7 +42,20 @@ class FactorEstimation(ExamineSparseDB):
 
       self.clf = None
 
+
    def _split_data(self, factor, factor_null_val):
+      """
+         Splits self.data into two sparse matrices.
+
+         Arguments:
+
+         Returns:
+          A tuple of two sparse matrices containing rows for which
+          factor's 'factor' values:
+          (1) equal 'factor_null_val'
+          (2) do not equal 'factor_null_val'
+
+      """
       fac_len, rows_len = self.fac_len, self.data.shape[0]
       fac_ind = self.col_names.index(factor)
 
@@ -62,6 +75,11 @@ class FactorEstimation(ExamineSparseDB):
 
 
    def _iter_features(self):
+      """
+         Returns a generator, which iterates through the values of fetures.
+
+         Yields a tuple of (column_index, column_name).
+      """
       for ind, colname in enumerate(self.col_names):
          if ind < self.fac_len: # omit columns containing factors
             continue
@@ -69,6 +87,13 @@ class FactorEstimation(ExamineSparseDB):
 
 
    def _get_features_only(self, from_m=None):
+      """
+         Drop factors data from the matrix and return features-only data.
+
+         Arguments:
+          from_m (sparse matrix) - if set, drop factors from 'from_m'.
+                                   Otherwise, drop from 'self.data'.
+      """
       new = []
       m_csc = None
       if from_m is None:
@@ -81,6 +106,9 @@ class FactorEstimation(ExamineSparseDB):
       return sparse.hstack(new)
 
    def cv(self, factor):
+      """
+         Cross-validate prediction of factor 'factor'.
+      """
       fac_ind = self.col_names.index(factor)
       self.clf = neighbors.KNeighborsClassifier(40, algorithm='brute', metric='cosine')
       z=self._get_features_only(self.non_null_set).astype(float)

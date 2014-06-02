@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8
+
 import sys
 from lib.nai.cv import NodeAttrInferCV
 
