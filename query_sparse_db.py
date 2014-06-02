@@ -8,13 +8,13 @@ a = ExamineSparseDB('data/links/links_matrix.mtx.gz',
                     'data/links/links_colnames.msg.gz',
                     'data/links/factors.msg.gz')
 
-print a.get_popular(50)
-#print a.get_popular(50, least=True)
+print a.get_popular(10)
+print a.get_popular(10, least=True)
 #print a.get_by_freq()
 
 #col_names, data = a.del_features_by_nam(['Kwejk', 'Obrazki FB', 'youtube.com', 'facebook.com'])
 #print len(col_names), data.shape
 
-col_names, data = a.del_features_by_freq()
-print len(col_names), data.shape
+#col_names, data = a.del_features_by_freq()
+#print len(col_names), data.shape
 

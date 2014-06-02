@@ -70,4 +70,54 @@ Iteration: 3. Top 10 biggest errors: [35, 34, 32, 29, 25, 21, 19, 18, 17, 16].
 ```
 
 
+query_sparse_db.py
+------------------
 
+This package comes with a number of databases in scipy's sparse matrix format. query_sparse_db.py provides some examples of helper functions to facilitate examining of these databases.
+
+For example you are able to do this:
+
+```
+from lib.examine_sparse_db import ExamineSparseDB
+
+a = ExamineSparseDB('data/links/links_matrix.mtx.gz',
+                    'data/links/links_colnames.msg.gz',
+                    'data/links/factors.msg.gz')
+
+print a.get_popular(10)
+```
+
+This will return 50 most popular features:
+
+```
+[('youtube.com', 14980), ('Obrazki FB', 13843), ('facebook.com', 10432), ('demotywatory.pl', 7316), ('kwejk.pl', 6677), ('gazeta.pl', 5513), ('vimeo.com', 5321), ('onet.pl', 5031), ('wrzuta.pl', 4482), ('wp.pl', 3925)]
+```
+
+On the other hand calling:
+
+```
+print a.get_popular(10, least=True)
+```
+
+will return 10 least popular links:
+
+```
+[('548426_440524952689441_220491277_n.jpg', 16), ('523004_292705267495944_1723994932_n.jpg', 16), ('402728_357842164303281_1435223383_n.jpg', 15), ('christian-dogma.com', 15), ('youtube.com/watch?v=BVp8xWsteMo', 15), ('start.no', 15), ('lostbubblegame.com', 15), ('pato.pl', 15), ('takafaza.pl', 14), ('jakboczek.pl', 13)]
+```
+
+
+do_estimations.py
+-----------------
+
+A sample of how to carry out cross-validation and prediction of particular factors given the available set of features.
+
+To perform cross-valdation for predicting 'age' based on links Facebook users post on their profiles one should do the following:
+
+```
+from lib.estimate_factor import FactorEstimation
+
+a = FactorEstimation('data/links/links_matrix.mtx.gz',
+                     'data/links/links_colnames.msg.gz',
+                     'data/links/factors.msg.gz')
+a.cv('age')
+```

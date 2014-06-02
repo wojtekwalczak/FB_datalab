@@ -33,12 +33,13 @@ class ExamineSparseDB(Utils):
 
       self.data = None
 
+      self._init()
 
    def _init(self):
-      self.data = sio.mmread(gzip.open(self.matrix_fn)).tolil()
-      self.col_names = self.factors + self._load_pickle(self.colnames_fn)
+      self.data = sio.mmread(gzip.open(self._matrix_fn)).tolil()
       self.factors = self._load_pickle(self._factors_fn)
       self.fac_len = len(self.factors)
+      self.col_names = self.factors + self._load_pickle(self._colnames_fn)
       assert self.data.shape[1] == len(self.col_names),\
                  'Mismatch between the number of columns: %s - %s.'\
                      % (self.data.shape[1], len(self.col_names))
@@ -67,9 +68,10 @@ class ExamineSparseDB(Utils):
       for ind, colname in self._iter_features():
          f_dict[colname] = m_csc.getcol(ind).nnz
 
-      return sorted(f_dict.items(),
-                    key=lambda x: x[1],
-                    reverse=False if least else True)[:num]
+      if least:
+         return sorted(f_dict.items(), key=lambda x: x[1], reverse=True)[-num:]
+      else:
+         return sorted(f_dict.items(), key=lambda x: x[1], reverse=True)[:num]
 
 
    def get_by_freq(self, freq=100, less_than=False):
