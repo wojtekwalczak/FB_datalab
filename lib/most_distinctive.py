@@ -29,6 +29,7 @@ import matplotlib.pyplot as plt
 import brewer2mpl
 from pylab import get_cmap
 
+from utils.utils import Utils
 
 location_codes = {
    #0: u'b/d',
@@ -60,7 +61,7 @@ rs_codes = [i[1] for i in sorted(rs_codes.items(), key=lambda x: x[0])]
 
 
 
-class ProcessMostDistinctive(object):
+class ProcessMostDistinctive(Utils):
    """
 
    """
@@ -68,7 +69,7 @@ class ProcessMostDistinctive(object):
    def __init__(self,
                 matrix_fn=None,
                 colnames_fn=None,
-                factors=None,
+                factors_fn=None,
                 verbose=1):
       """
 
@@ -86,7 +87,7 @@ class ProcessMostDistinctive(object):
 
       self.data = sio.mmread(gzip.open(matrix_fn)).tolil()
 
-      self.factors = list(factors)
+      self.factors = self._load_pickle(factors_fn)
       self.fac_len = len(self.factors)
 
       self.col_names = self.factors + self._load_pickle(colnames_fn)
@@ -112,12 +113,6 @@ class ProcessMostDistinctive(object):
          cm = get_cmap('Dark2')
          return [cm(1.*i/num) for i in range(num)]
 
-
-   def _load_pickle(self, fn):
-      w = gzip.open(fn)
-      data = msgpack.unpack(w)
-      w.close()
-      return data
 
 
    def _print(self, astr):

@@ -5,17 +5,7 @@ from lib.most_distinctive import ProcessMostDistinctive
 if __name__ == '__main__':
    a = ProcessMostDistinctive(matrix_fn='data/links/links_matrix.mtx.gz',
                               colnames_fn='data/links/links_colnames.msg.gz',
-                              factors=('uid',
-                                       'feed_len',
-                                       'is_full_feed',
-                                       'age',
-                                       'age_range',
-                                       'is_male',
-                                       'number_of_friends',
-                                       'number_of_friends_range',
-                                       'location_size',
-                                       'hometown_size',
-                                       'relationship_status'))
+                              factors_fn='data/links/factors.msg.gz')
 
    a.do_age(u'Popularność linków ze względu na wiek',
             savefn='links_most_distinctive_age.png')
