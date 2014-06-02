@@ -87,7 +87,7 @@ a = ExamineSparseDB('data/links/links_matrix.mtx.gz',
 print a.get_popular(10)
 ```
 
-This will return 50 most popular features:
+This will return 10 most popular features:
 
 ```
 [('youtube.com', 14980), ('Obrazki FB', 13843), ('facebook.com', 10432), ('demotywatory.pl', 7316), ('kwejk.pl', 6677), ('gazeta.pl', 5513), ('vimeo.com', 5321), ('onet.pl', 5031), ('wrzuta.pl', 4482), ('wp.pl', 3925)]
@@ -106,8 +106,8 @@ will return 10 least popular links:
 ```
 
 
-do_estimations.py
------------------
+run_estimations.py
+------------------
 
 A sample of how to carry out cross-validation and prediction of particular factors given the available set of features.
 
@@ -121,3 +121,15 @@ a = FactorEstimation('data/links/links_matrix.mtx.gz',
                      'data/links/factors.msg.gz')
 a.cv('age')
 ```
+
+This will produce results similar to the following lines:
+
+```
+4.14232033819 +/- 5.07028463257
+4.3597933302 +/- 5.63557438023
+3.99154532644 +/- 5.25908584676
+4.04088345865 +/- 5.13718948072
+4.0469924812 +/- 5.30592752445
+```
+
+These are mean errors and standard deviations for predictions in five iterations.
