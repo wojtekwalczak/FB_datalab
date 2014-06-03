@@ -131,10 +131,10 @@ class ExamineSparseDB(Utils):
       self.data = sparse.hstack(new_sparse).tocoo()
       return self.data, self.col_names
 
-   def shadow_val(self, factor, from_val, to_val):
+   def shadow_val(self, factor, shadow_func, to_val):
       fac_ind = self.col_names.index(factor)
-
+      self.data = self.data.tolil()
       for row_ind in range(self.data.shape[0]):
-         if self.data[row_ind, fac_ind] in from_val:
+         if shadow_func(self.data[row_ind, fac_ind]):
             self.data[row_ind, fac_ind] = to_val
 

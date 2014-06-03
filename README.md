@@ -119,7 +119,12 @@ from lib.estimate_factor import FactorEstimation
 a = FactorEstimation('data/links/links_matrix.mtx.gz',
                      'data/links/links_colnames.msg.gz',
                      'data/links/factors.msg.gz')
-a.cv('age')
+
+a.cv('age', # factor to predict
+     'split_val': 0, # values of factor to predict
+     'shadow_func': lambda x: x > 66, # for users older than 66...
+     'shadow_to_val': 0, # shadow their age with 0 and predict age
+     'del_freq': 450) # remove features if shared by 450 users
 ```
 
 This will produce results similar to the following lines:

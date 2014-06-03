@@ -16,31 +16,43 @@ import brewer2mpl
 from pylab import get_cmap
 
 from scipy.sparse import linalg
-from sklearn import neighbors, cross_validation
+from sklearn import cross_validation
+from sklearn.neighbors import KNeighborsClassifier as KNNC
 
 from lib.examine_sparse_db import ExamineSparseDB
 
+
+
 class FactorEstimation(ExamineSparseDB):
    def __init__(self, matrix_fn, colnames_fn, factors_fn, verbose=1):
-      self.data = sio.mmread(gzip.open(matrix_fn)).tolil()
+      self._matrix_fn = matrix_fn
+      self._colnames_fn = colnames_fn
+      self._factors_fn = factors_fn
 
-      self.factors = self._load_pickle(factors_fn)
-      self.fac_len = len(self.factors)
-
-      self.col_names = self.factors + self._load_pickle(colnames_fn)
+      self.data = None
+      self.factors = None
+      self.fac_len = 0
+      self.col_names = None
 
       self.verbose = verbose
+
+      self.clf = None
+      self.null_set, self.non_null_set = None, None
+
+      self._init()
+
+
+
+   def _init(self):
+      self.data = sio.mmread(gzip.open(self._matrix_fn)).tolil()
+      self.factors = self._load_pickle(self._factors_fn)
+      self.fac_len = len(self.factors)
+      self.col_names = self.factors + self._load_pickle(self._colnames_fn)
 
       assert self.data.shape[1] == len(self.col_names),\
                  'Mismatch between the number of columns: %s - %s.'\
                      % (self.data.shape[1], len(self.col_names))
 
-      self.shadow_val('age', range(66, 130), 0)
-      self.data, self.col_names = self.del_features_by_freq(freq=450)
-      #self.data, self.col_names = self.del_features_by_freq(freq=30, less_than=True)
-      self.null_set, self.non_null_set = self._split_data('age', 0)
-
-      self.clf = None
 
 
    def _split_data(self, factor, factor_null_val):
@@ -105,12 +117,41 @@ class FactorEstimation(ExamineSparseDB):
          new.append(m_csc.getcol(ind).tocoo())
       return sparse.hstack(new)
 
-   def cv(self, factor):
+
+
+   def _prepare(self, factor,
+                      split_val,
+                      shadow_func=None,
+                      shadow_to_val=None,
+                      del_freq=None):
+
+      if shadow_func is not None:
+         self.shadow_val(factor, shadow_func, shadow_to_val)
+
+      if del_freq is not None:
+         self.data, self.col_names = self.del_features_by_freq(freq=del_freq)
+         #self.data, self.col_names = self.del_features_by_freq(freq=30, less_than=True)
+      self.null_set, self.non_null_set = self._split_data(factor, split_val)
+
+
+
+   def cv(self, factor,
+                split_val,
+                shadow_func=None,
+                shadow_to_val=None,
+                del_freq=None):
       """
          Cross-validate prediction of factor 'factor'.
       """
+
+      self._prepare(factor,
+                    split_val,
+                    shadow_func=shadow_func,
+                    shadow_to_val=shadow_to_val,
+                    del_freq=del_freq)
+
       fac_ind = self.col_names.index(factor)
-      self.clf = neighbors.KNeighborsClassifier(40, algorithm='brute', metric='cosine')
+      self.clf = KNNC(40, algorithm='brute', metric='cosine')
       z=self._get_features_only(self.non_null_set).astype(float)
       target = np.ravel(self.non_null_set.getcol(fac_ind).todense())
       u, s, v = linalg.svds(z, k=51)
@@ -118,7 +159,7 @@ class FactorEstimation(ExamineSparseDB):
 
       kf = cross_validation.KFold(len(target), 5)
       for train_idx, test_idx in kf:
-         print len(train_idx), len(test_idx)
+         #print len(train_idx), len(test_idx)
          self.clf.fit(T[train_idx], target[train_idx])
          r = self.clf.predict(T[test_idx])
          print np.mean(np.abs(r - target[test_idx])),\
@@ -129,11 +170,22 @@ class FactorEstimation(ExamineSparseDB):
          #      print round(predicted, 0), round(real, 0)
 
 
-   def predict(self, factor, results_fn):
+
+   def predict(self, factor,
+                     split_val,
+                     shadow_func=None,
+                     shadow_to_val=None,
+                     del_freq=None,
+                     results_fn=None):
+
+      self._prepare(factor,
+                    split_val,
+                    shadow_func=shadow_func,
+                    shadow_to_val=shadow_to_val,
+                    del_freq=del_freq)
+
       fac_ind = self.col_names.index(factor)
-      self.clf = neighbors.KNeighborsClassifier(40,
-                                                algorithm='brute',
-                                                metric='cosine')
+      self.clf = KNNC(40, algorithm='brute', metric='cosine')
       z=self._get_features_only(self.non_null_set).astype(float)
       target = np.ravel(self.non_null_set.getcol(fac_ind).todense())
       u, s, v = linalg.svds(z, k=51)
@@ -150,7 +202,10 @@ class FactorEstimation(ExamineSparseDB):
          r = self.clf.predict(T2[row_ind])
          results.append((int(self.non_null_set[row_ind, 0]), int(r[0])))
 
-      w = open(results_fn, 'w')
-      msgpack.pack(results, w)
-      w.close()
+      if results_fn is not None:
+         w = open(results_fn, 'w')
+         msgpack.pack(results, w)
+         w.close()
+      else:
+         print results
 
