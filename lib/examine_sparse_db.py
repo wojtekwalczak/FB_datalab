@@ -4,7 +4,6 @@
 import gzip
 import numpy as np
 import pandas as pd
-import scipy.io as sio
 import scipy.sparse as sparse
 import matplotlib.pyplot as plt
 import brewer2mpl
@@ -12,10 +11,9 @@ import brewer2mpl
 from pylab import get_cmap
 from collections import defaultdict
 
-from utils.utils import Utils
+from lib.generic_sparse_db import GenericSparseDB
 
-
-class ExamineSparseDB(Utils):
+class ExamineSparseDB(GenericSparseDB):
    def __init__(self,
                 matrix_fn=None,
                 colnames_fn=None,
@@ -33,19 +31,7 @@ class ExamineSparseDB(Utils):
 
       self.data = None
 
-      self._init()
-
-   def _init(self):
-      self.data = sio.mmread(gzip.open(self._matrix_fn)).tolil()
-      self.factors = self._load_pickle(self._factors_fn)
-      self.fac_len = len(self.factors)
-      self.col_names = self.factors + self._load_pickle(self._colnames_fn)
-      assert self.data.shape[1] == len(self.col_names),\
-                 'Mismatch between the number of columns: %s - %s.'\
-                     % (self.data.shape[1], len(self.col_names))
-
-   def reset(self):
-      self._init()
+      self.init()
 
 
    def _iter_features(self):

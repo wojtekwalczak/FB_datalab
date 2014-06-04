@@ -30,6 +30,8 @@ import brewer2mpl
 from pylab import get_cmap
 
 from utils.utils import Utils
+from lib.examine_sparse_db import ExamineSparseDB
+
 
 location_codes = {
    #0: u'b/d',
@@ -61,7 +63,7 @@ rs_codes = [i[1] for i in sorted(rs_codes.items(), key=lambda x: x[0])]
 
 
 
-class ProcessMostDistinctive(Utils):
+class ProcessMostDistinctive(ExamineSparseDB):
    """
 
    """
@@ -85,21 +87,20 @@ class ProcessMostDistinctive(Utils):
 
       """
 
-      self.data = sio.mmread(gzip.open(matrix_fn)).tolil()
+      self._matrix_fn = matrix_fn
+      self._colnames_fn = colnames_fn
+      self._factors_fn = factors_fn
 
-      self.factors = self._load_pickle(factors_fn)
-      self.fac_len = len(self.factors)
-
-      self.col_names = self.factors + self._load_pickle(colnames_fn)
+      self.factors = None
+      self.fac_len = 0
 
       self.verbose = verbose
 
-      assert self.data.shape[1] == len(self.col_names),\
-                 'Mismatch between the number of columns: %s - %s.'\
-                     % (self.data.shape[1], len(self.col_names))
-
+      self.data = None
       self.df = None
       self.categorized = None
+
+      self.init()
 
 
    def _reset(self):
