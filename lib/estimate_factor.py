@@ -148,7 +148,8 @@ class FactorEstimation(ExamineSparseDB):
          #print len(train_idx), len(test_idx)
          self.clf.fit(T[train_idx], target[train_idx])
          r = self.clf.predict(T[test_idx])
-         print np.mean(np.abs(r - target[test_idx])),\
+         print 'Average error:',\
+               np.mean(np.abs(r - target[test_idx])),\
                "+/-",\
                np.std(np.abs(r - target[test_idx]))
          #for predicted, real in zip(r, target[test_idx]):
@@ -177,7 +178,7 @@ class FactorEstimation(ExamineSparseDB):
       u, s, v = linalg.svds(z, k=51)
       T = u.dot(np.diag(s))
 
-      z2=self._get_features_only(self.non_null_set).astype(float)
+      z2=self._get_features_only(self.null_set).astype(float)
       u2, s2, v2 = linalg.svds(z2, k=51)
       T2 = u2.dot(np.diag(s2))
 
@@ -186,7 +187,7 @@ class FactorEstimation(ExamineSparseDB):
       self.clf.fit(T, target)
       for row_ind in range(self.null_set.shape[0]):
          r = self.clf.predict(T2[row_ind])
-         results.append((int(self.non_null_set[row_ind, 0]), int(r[0])))
+         results.append((int(self.null_set[row_ind, 0]), int(r[0])))
 
       if results_fn is not None:
          w = open(results_fn, 'w')
