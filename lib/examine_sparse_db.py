@@ -96,6 +96,16 @@ class ExamineSparseDB(GenericSparseDB):
 
 
    def del_features_by_freq(self, freq=100, less_than=False):
+      """
+         Delete features common for at least 'freq' users.
+
+         If 'less_than' is True, delete features common for
+         no more than 'freq' users.
+
+         Returns a tuple of two elements:
+            (sparse_matrix_without_deleted_columns,
+             list_of_column_names_without_deleted_columns)
+      """
       names = self.factors[:]
       new_sparse = []
       m_csc = self.data.tocsc()
@@ -117,7 +127,17 @@ class ExamineSparseDB(GenericSparseDB):
       self.data = sparse.hstack(new_sparse).tocoo()
       return self.data, self.col_names
 
+
    def shadow_val(self, factor, shadow_func, to_val):
+      """
+         For values of 'factor', whenever shadow_func(value) returns True,
+         change the original value to 'to_val'.
+
+         For example, for users who declare age larger than 66, we want to
+         change the declared values to 0:
+
+            self.shadow_val('age', lambda x: x > 66, 0)
+      """
       fac_ind = self.col_names.index(factor)
       self.data = self.data.tolil()
       for row_ind in range(self.data.shape[0]):
