@@ -18,4 +18,4 @@ class GenericSparseDB(Utils):
                      % (self.data.shape[1], len(self.col_names))
 
    def reset(self):
-      self._init()
+      self.init()

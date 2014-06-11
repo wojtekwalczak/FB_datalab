@@ -9,3 +9,4 @@ MANIFEST
 *.log
 *.png
 results/*
+__*
