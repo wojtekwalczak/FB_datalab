@@ -138,3 +138,13 @@ This will produce results similar to the following lines:
 ```
 
 These are mean errors and standard deviations for predictions in five iterations.
+
+
+run_emotions_detection.py
+-------------------------
+
+Generate tagclouds of words with positive/negative meaning (words mostly in Polish), such as:
+
+![alt tag](http://laboratoriumdanych.pl/wp-content/uploads/2014/06/negative_tags.png)
+
+Also, generate a list of most distinctive features using NLTK's `nltk.NaiveBayesClassifier`.
